@@ -1,5 +1,6 @@
 from math import log
-from pydantic import BaseSettings, Field, HttpUrl
+from pydantic_settings import BaseSettings
+from pydantic import Field, HttpUrl
 
 class Settings(BaseSettings):
     tg_token:   str | None = Field(None, env="TG_TOKEN")
