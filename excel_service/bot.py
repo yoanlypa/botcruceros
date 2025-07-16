@@ -76,16 +76,16 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
         await update.effective_message.reply_text("⚠️ Error interno.")
 
 # ────────────── arranque del bot ──────────────────────────────
-def run_bot() -> None:
+async def run_bot_async():
     if not settings.tg_token:
         log.warning("TG_TOKEN no definido: el bot no se iniciará.")
         return
-
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
 
     app = ApplicationBuilder().token(settings.tg_token).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.Document.ALL, handle_doc))
     app.add_error_handler(error_handler)
-    app.run_polling()
+
+    await app.initialize()
+    await app.start()        # inicia polling SIN instalar señales
+    log.info("Telegram bot started")

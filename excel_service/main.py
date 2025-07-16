@@ -4,6 +4,8 @@ from .config import settings
 from .exceptions import ParseError, ApiError
 from .client import ApiClient
 import threading
+from excel_service.bot import run_bot_async
+import asyncio
 
 app = FastAPI(title="Excel Supplier Microservice")
 
@@ -22,10 +24,10 @@ async def upload_excel(file: UploadFile = File(...)):
         raise HTTPException(502, str(e))
 
 # ---- Bot en background (opcional) ----
-def _start_bot():
-    from .bot import run_bot
-    run_bot()
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(run_bot_async())
 
 if settings.tg_token:        # solo arranca si tienes token
     import threading
-    threading.Thread(target=_start_bot, daemon=True).start()
+    threading.Thread(target=lambda: asyncio.run(run_bot_async()), daemon=True).start()
