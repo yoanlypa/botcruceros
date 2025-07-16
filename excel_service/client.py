@@ -10,7 +10,9 @@ from .exceptions import ApiError
 
 class ApiClient:
     def __init__(self):
-        self.base = settings.django_url.rstrip("/") + "/api"
+        # cast a str → ya tiene rstrip
+        self.base = str(settings.django_url).rstrip("/") + "/api"
+        self.cli = httpx.AsyncClient(timeout=20)
         self.headers: dict[str, str] = {}
         self._jwt_exp: dt.datetime | None = None
         if settings.django_email and settings.django_pass:
