@@ -89,3 +89,14 @@ async def run_bot_async():
     await app.initialize()
     await app.start()        # inicia polling SIN instalar señales
     log.info("Telegram bot started")
+import http.server, socketserver, threading
+
+def _health_server():
+    class Handler(http.server.SimpleHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"OK")
+    socketserver.TCPServer(("0.0.0.0", 8080), Handler).serve_forever()
+
+threading.Thread(target=_health_server, daemon=True).start()
