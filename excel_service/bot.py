@@ -102,22 +102,23 @@ def _health_server():
 threading.Thread(target=_health_server, daemon=True).start()
 
 # ────────────── arranque principal ─────────────────────────
-async def run_bot_async():
+
+def run_bot() -> None:
     if not settings.tg_token:
         log.warning("TG_TOKEN no definido: el bot no se iniciará.")
         return
 
+    # run_polling crea y maneja su propio loop: no necesitamos asyncio.run
     app = ApplicationBuilder().token(settings.tg_token).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.Document.ALL, handle_doc))
     app.add_error_handler(error_handler)
 
     log.info("Starting bot with token prefix %s…", settings.tg_token[:8])
+    # ← aquí la clave: sin signal-handlers y sin cerrar el loop
+    app.run_polling(stop_signals=None, close_loop=False)
 
-    await app.initialize()
-    await app.start()
-    await app.updater.start_polling()
-    await app.updater.idle()      # mantiene vivo hasta Ctrl-C / SIGTERM
+# -------- health server se queda igual --------
 
 if __name__ == "__main__":
-    asyncio.run(run_bot_async())
+    run_bot()
