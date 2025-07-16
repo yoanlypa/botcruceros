@@ -52,9 +52,9 @@ META_ALIAS = {
     "ship":               "ship",
     "barco":              "ship",
 
-    "status":             "status",
-    "estado":             "status",
-
+    "status":            "status",        
+    "state":             "status",        
+    "estado":            "status",
     "terminal":           "terminal",
 }
 
