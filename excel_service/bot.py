@@ -27,7 +27,6 @@ from excel_service.exceptions import ParseError, ApiError
 
 log = logging.getLogger("excel_bot")
 logging.basicConfig(level=logging.INFO)
-
 # ────────────── helpers ─────────────────────────────────────
 def sanitize(d: dict) -> dict:
     """Convierte NaN a None y datetime a ISO string para JSON."""
@@ -122,3 +121,15 @@ def run_bot() -> None:
 
 if __name__ == "__main__":
     run_bot()
+
+
+async def send_pedidos_feedback(update, pedidos):
+    resp = await ApiClient().post_pedidos(pedidos)
+    txt = f"✅ Creados: {resp['created']}"
+    if resp.get("deleted"):
+        txt += f" · Reemplazados: {resp['deleted']}"
+    for line in resp.get("feedback", []):
+        txt += f"\n{line}"
+    await update.message.reply_text(txt)
+
+
