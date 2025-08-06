@@ -72,7 +72,7 @@ async def handle_document(message: Message):
         await message.reply("❌ Archivo demasiado grande.")
         return
 
-  tgfile = await bot.get_file(doc.file_id)
+    tgfile = await bot.get_file(doc.file_id)
     content_bytes = (await bot.download_file(tgfile.file_path)).read()
 
     try:
