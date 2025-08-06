@@ -26,7 +26,7 @@ import asyncio
 
 # ─────── Configuración ───────
 load_dotenv()
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TOKEN = os.getenv("TG_TOKEN")
 MAX_SIZE_MB = int(os.getenv("MAX_SIZE_MB", 10))
 ALLOWED_USERS = [123456789]  # 👈 Reemplaza con tu ID de Telegram
 
@@ -110,7 +110,7 @@ threading.Thread(target=_health_server, daemon=True).start()
 # ─────── Arranque principal ───────
 async def main():
     if not TOKEN:
-        log.warning("TELEGRAM_BOT_TOKEN no definido. El bot no se iniciará.")
+        log.warning("TELEGRAM TOKEN no definido. El bot no se iniciará.")
         return
 
     dp.include_router(router)
