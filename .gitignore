@@ -1,0 +1,13 @@
+.env
+*.env
+.env.*
+# Archivos temporales
+__pycache__/
+*.py[cod]
+*.log
+# Virtual environments
+venv/
+.envrc
+# Archivos de sistema
+.DS_Store
+Thumbs.db
