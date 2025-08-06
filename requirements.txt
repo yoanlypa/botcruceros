@@ -1,10 +1,12 @@
 aiogram==3.4.1
 pydantic==2.5.3
+pydantic-settings==2.0.3
 python-dotenv
 pandas
 openpyxl
 requests
 python-telegram-bot
+
 
 
 
