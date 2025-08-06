@@ -49,6 +49,9 @@ def sanitize(d: dict) -> dict:
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher(storage=MemoryStorage())
 router = Router()
+@router.message(F.text == "/id")
+async def cmd_id(message: Message):
+    await message.reply(f"🆔 Tu user_id es: <code>{message.from_user.id}</code>")
 
 @router.message(F.text == "/start")
 async def start_cmd(message: Message):
@@ -69,15 +72,23 @@ async def handle_document(message: Message):
         await message.reply("❌ Archivo demasiado grande.")
         return
 
-    file = await bot.get_file(doc.file_id)
-    content = await bot.download_file(file.file_path)
-    content_bytes = content.read()
+  tgfile = await bot.get_file(doc.file_id)
+    content_bytes = (await bot.download_file(tgfile.file_path)).read()
 
     try:
         data = parse_excel(content_bytes)
         pedidos = [sanitize({**data["general"], **m}) for m in data["maletas"]]
         resp = await ApiClient().post_pedidos(pedidos)
-        await message.reply(f"✅ Creados: {resp['created']} · Actualizados: {resp['updated']}")
+
+        msg = (
+            f"✅ Creados: <b>{resp['created']}</b> · "
+            f"Sobre-escritos: <b>{resp.get('overwritten',0)}</b>"
+        )
+        if resp.get("blocked"):
+            msg += (
+                f"\n⚠️ Bloqueados por estado <i>final</i>: <b>{resp['blocked']}</b>"
+            )
+        await message.reply(msg)
 
     except ParseError as e:
         await message.reply_document(
@@ -86,36 +97,37 @@ async def handle_document(message: Message):
             caption=f"❌ Parseo: {e}",
         )
     except ApiError as e:
-        msg = str(e)
-        if len(msg) > 400:
-            msg = msg[:400] + "…"
-        await message.reply(f"❌ API: {msg}")
-    except Exception as e:
-        log.exception("❌ Error inesperado procesando el archivo.")
-        await message.reply("❌ Error inesperado.")
+        txt = str(e)
+        if "final ya confirmado" in txt or "bloqueado" in txt:
+            await message.reply(
+                "⚠️ Algunos registros estaban cerrados en estado <b>final</b> y el Excel venía como <i>preliminary</i>."
+            )
+        else:
+            if len(txt) > 400:
+                txt = txt[:400] + "…"
+            await message.reply(f"❌ Error de API:\n{txt}")
+    except Exception:
+        log.exception("Error inesperado")
+        await message.reply("❌ Error inesperado procesando el archivo.")
 
-# ─────── Health check para Railway ───────
+# ---------- Health check para Railway ----------
 def _health_server():
     port = int(os.getenv("PORT", 8080))
     class Handler(http.server.SimpleHTTPRequestHandler):
-        def log_message(self, fmt, *args): return
+        def log_message(self, fmt, *args): ...
         def do_GET(self):
-            self.send_response(200)
-            self.end_headers()
-            self.wfile.write(b"OK")
+            self.send_response(200); self.end_headers(); self.wfile.write(b"OK")
     socketserver.TCPServer(("0.0.0.0", port), Handler).serve_forever()
-
 threading.Thread(target=_health_server, daemon=True).start()
 
-# ─────── Arranque principal ───────
+# ---------- Main ----------
 async def main():
     if not TOKEN:
-        log.warning("TELEGRAM TOKEN no definido. El bot no se iniciará.")
+        log.warning("TELEGRAM TOKEN no definido; el bot no se iniciará.")
         return
-
     dp.include_router(router)
     await bot.delete_webhook(drop_pending_updates=True)
-    log.info("🤖 Bot iniciado correctamente.")
+    log.info("🤖 Bot listo.")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
