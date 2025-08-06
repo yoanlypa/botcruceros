@@ -22,4 +22,5 @@ typing-inspection==0.4.1
 typing_extensions==4.14.1
 tzdata==2025.2
 aiogram==2.25.1
+aiohttp==3.8.5
 
