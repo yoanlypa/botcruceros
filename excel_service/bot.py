@@ -28,7 +28,7 @@ import asyncio
 load_dotenv()
 TOKEN = os.getenv("TG_TOKEN")
 MAX_SIZE_MB = int(os.getenv("MAX_SIZE_MB", 10))
-ALLOWED_USERS = [123456789]  # 👈 Reemplaza con tu ID de Telegram
+ALLOWED_USERS = [8044055695]  # 👈 Reemplaza con tu ID de Telegram
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("excel_bot")
