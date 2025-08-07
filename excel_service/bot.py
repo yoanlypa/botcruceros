@@ -87,15 +87,16 @@ async def handle_document(message: Message):
         resp = await ApiClient().post_pedidos(pedidos)
 
         msg = (
-            f"✅ Creados: <b>{resp['created']}</b> · "
+            f"✅ Creados: <b>{resp.get('created',0)}</b> · "
             f"Sobre-escritos: <b>{resp.get('overwritten',0)}</b>"
         )
         if resp.get("blocked"):
             msg += (
-                f"\n⚠️ Grupos bloqueados por estado <i>final</i>: "
+                f"\n⚠️ Lotes bloqueados por estado <i>final</i>: "
                 f"<b>{resp['blocked']}</b>"
             )
-            await message.reply(msg)
+        await message.reply(msg)
+
 
     except ParseError as e:
         await message.reply_document(
