@@ -86,9 +86,10 @@ async def handle_document(message: Message):
         )
         if resp.get("blocked"):
             msg += (
-                f"\n⚠️ Bloqueados por estado <i>final</i>: <b>{resp['blocked']}</b>"
+                f"\n⚠️ Grupos bloqueados por estado <i>final</i>: "
+                f"<b>{resp['blocked']}</b>"
             )
-        await message.reply(msg)
+            await message.reply(msg)
 
     except ParseError as e:
         await message.reply_document(
