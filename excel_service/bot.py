@@ -33,6 +33,7 @@ ALLOWED_USERS = [6529038645]  # 👈 Reemplaza con tu ID de Telegram
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("excel_bot")
 
+
 # ─────── Sanitizador ───────
 def sanitize(d: dict) -> dict:
     out = {}
@@ -45,19 +46,24 @@ def sanitize(d: dict) -> dict:
             out[k] = v
     return out
 
+
 # ─────── Bot y Router ───────
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher(storage=MemoryStorage())
 router = Router()
+
+
 @router.message(F.text == "/id")
 async def cmd_id(message: Message):
     await message.reply(f"🆔 Tu user_id es: <code>{message.from_user.id}</code>")
+
 
 @router.message(F.text == "/start")
 async def start_cmd(message: Message):
     if message.from_user.id not in ALLOWED_USERS:
         return await message.reply("⛔ No tienes permiso para usar este bot.")
     await message.reply("👋 Envíame un Excel 'Supplier Confirmation' y lo procesaré.")
+
 
 @router.message(F.content_type == ContentType.DOCUMENT)
 async def handle_document(message: Message):
@@ -111,15 +117,23 @@ async def handle_document(message: Message):
         log.exception("Error inesperado")
         await message.reply("❌ Error inesperado procesando el archivo.")
 
+
 # ---------- Health check para Railway ----------
 def _health_server():
     port = int(os.getenv("PORT", 8080))
+
     class Handler(http.server.SimpleHTTPRequestHandler):
         def log_message(self, fmt, *args): ...
         def do_GET(self):
-            self.send_response(200); self.end_headers(); self.wfile.write(b"OK")
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"OK")
+
     socketserver.TCPServer(("0.0.0.0", port), Handler).serve_forever()
+
+
 threading.Thread(target=_health_server, daemon=True).start()
+
 
 # ---------- Main ----------
 async def main():
@@ -130,6 +144,7 @@ async def main():
     await bot.delete_webhook(drop_pending_updates=True)
     log.info("🤖 Bot listo.")
     await dp.start_polling(bot)
+
 
 if __name__ == "__main__":
     asyncio.run(main())
